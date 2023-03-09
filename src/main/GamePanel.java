@@ -1,5 +1,9 @@
 package main;
 
+import entity.Player;
+import object.SuperObject;
+import tile.TileManager;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -9,14 +13,19 @@ public class GamePanel extends JPanel implements Runnable{
 
     final int scale = 3;
 
-    final int tileSize = originalTileSize * scale; // 48x48
+    public final int tileSize = originalTileSize * scale; // 48x48
 
-    final int maxScreenCol = 16; //maximum width
+    public final int maxScreenCol = 16; //maximum width
 
-    final int maxScreenRow = 12; //maximum height
+    public final int maxScreenRow = 12; //maximum height
 
-    final int screenWidth = tileSize * maxScreenCol; //768 pixels
-    final int screenHeight = tileSize * maxScreenRow; //567 pixels
+    public final int screenWidth = tileSize * maxScreenCol; //768 pixels
+    public final int screenHeight = tileSize * maxScreenRow; //567 pixels
+    //World settings
+    public final int maxWorldCol = 50;
+    public final int maxWorldRow = 50;
+    public final int worldWidth = tileSize * maxWorldCol;
+    public final int worldHeight = tileSize * maxWorldRow;
 
 
     KeyHandler keyH = new KeyHandler();
@@ -24,12 +33,17 @@ public class GamePanel extends JPanel implements Runnable{
 
     //if fps is set up to 60 - then our program is going to update and draw do this 60 times per sec
     int FPS = 60;
+    TileManager tileM = new TileManager(this);
+    public Player player = new Player(this, keyH);
 
-    //setting players default position
-    int playerX = 100;
-    int playerY = 100;
-    int playerSpeed = 4;
+    // it means that we can display 10 objects at the same time
+    // it is for not slowing down the game -> if we pick the objectA we can still add some object and display it- it is not a problem
 
+    public SuperObject obj[] = new SuperObject[10];
+
+
+    public CollisionChecker checker = new CollisionChecker(this);
+    public AssetSetter aSetter = new AssetSetter(this);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));  //set the size of the JPanel class
@@ -42,9 +56,15 @@ public class GamePanel extends JPanel implements Runnable{
 
     }
 
+    //wwe have to call this method before the game starts
+    public void setupGame(){
+        aSetter.setObject();
+    }
+
     public void startGameThread(){
+
         gameThread = new Thread(this); //passing the GamePanel class to this constructor
-        gameThread.start();
+        gameThread.start(); // it is calling the run methood
     }
 
     /*
@@ -58,7 +78,7 @@ public class GamePanel extends JPanel implements Runnable{
 
         long lastTime = System.nanoTime();
         double delta = 0;
-        double drawInterval = 1000000000/FPS;
+        double drawInterval = 1000000000/FPS; // 0.01666...7 - seconds it draws the screen
         long timer = 0;
 
         int drawCount = 0;
@@ -90,28 +110,20 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void update(){
-        if(keyH.downPressed){
-            this.playerY += playerSpeed;
-        }
-        else if(keyH.rightPressed){
-            this.playerX += playerSpeed;
-        }
-        else if(keyH.leftPressed){
-            this.playerX -= playerSpeed;
-        }
-        if(keyH.upPressed){
-            this.playerY -= playerSpeed;
-        }
+        player.update();
     }
 
     public void paintComponent(Graphics g){ //graphics class has many functions to draw objects on the screen
-        super.paintComponent(g);
+        super.paintComponent(g); // always u just have to write this
         Graphics2D g2 = (Graphics2D) g;
 
-        g2.setColor(Color.WHITE);
-
-        g2.fillRect(playerX, playerY, tileSize, tileSize);  //draw a rectangle and fills it with the color  that was specified
-
+        tileM.draw(g2); //this have to be first(before drawing a player) to be a layer and to do not hide players
+        for (int i = 0; i < obj.length; i++) {
+            if(obj[i]!=null){
+                obj[i].draw(g2, this);
+            }
+        }
+        player.draw(g2);
         g2.dispose(); // dispose of this graphics context and release any system resources that is using.
 
 
