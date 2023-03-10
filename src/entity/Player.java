@@ -14,7 +14,7 @@ public class Player extends Entity {
     public final int screenY;
     GamePanel gp;
     KeyHandler keyH;
-    int hasKey = 0;
+    public int hasKey = 0;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         this.gp = gp;
@@ -119,17 +119,32 @@ public class Player extends Entity {
             String objectName = gp.obj[index].name;
             switch (objectName){
                 case "Key":
+                    gp.playSE(1);
                     hasKey++;
                     gp.obj[index] = null;
-                    System.out.println("Key:" + hasKey);
+                    gp.ui.showMessage("You got a key!");
                     break;
                 case "Door":
                     if(hasKey > 0){
+                        gp.playSE(3);
                         gp.obj[index] = null;
                         hasKey--;
+                        gp.ui.showMessage("You opened the door!");
 
+                    }else {
+                        gp.ui.showMessage("You need a key to open the door!");
                     }
-                    System.out.println("Key:" + hasKey);
+                    break;
+                case "Boots":
+                    gp.playSE(2 );
+                    speed+=2;
+                    gp.obj[index] = null;
+                    gp.ui.showMessage("Speed up!");
+                    break;
+                case "Chest":
+                    gp.ui.gameFinished = true;
+                    gp.stopMusic();
+                    gp.playSE(4);
                     break;
 
             }
@@ -180,3 +195,8 @@ public class Player extends Entity {
 
     }
 }
+
+
+
+
+// java default library cannot load mp3 - we have to prepare sound in WAV format and also it has to be 16 bit (32 bit doesn't work)

@@ -24,11 +24,14 @@ public class GamePanel extends JPanel implements Runnable{
     //World settings
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
-    public final int worldWidth = tileSize * maxWorldCol;
-    public final int worldHeight = tileSize * maxWorldRow;
+
+//    public final int worldWidth = tileSize * maxWorldCol;
+//    public final int worldHeight = tileSize * maxWorldRow;
 
 
     KeyHandler keyH = new KeyHandler();
+    Sound se = new Sound();
+    Sound music = new Sound();
     Thread gameThread; //it keeps our programm running until we stop it
 
     //if fps is set up to 60 - then our program is going to update and draw do this 60 times per sec
@@ -43,6 +46,7 @@ public class GamePanel extends JPanel implements Runnable{
 
 
     public CollisionChecker checker = new CollisionChecker(this);
+    public UI ui = new UI(this);
     public AssetSetter aSetter = new AssetSetter(this);
 
     public GamePanel() {
@@ -59,6 +63,8 @@ public class GamePanel extends JPanel implements Runnable{
     //wwe have to call this method before the game starts
     public void setupGame(){
         aSetter.setObject();
+
+        playMusic(0);
     }
 
     public void startGameThread(){
@@ -124,9 +130,30 @@ public class GamePanel extends JPanel implements Runnable{
             }
         }
         player.draw(g2);
+
+        //UI
+        ui.draw(g2);
         g2.dispose(); // dispose of this graphics context and release any system resources that is using.
 
 
+    }
+
+    // this is for the music that is going to be played during the game
+    public void playMusic(int i){
+        music.setFile(i);
+        music.play();
+        music.loop();
+
+    }
+
+    public void stopMusic(){
+        se.stop();
+    }
+
+    // it is for sounds effects in our game - very often it is a short sound
+    public void playSE(int i){
+        se.setFile(i);
+        se.play();
     }
 
 }
